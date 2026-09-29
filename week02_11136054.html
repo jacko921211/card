@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week02個人互動名片–11136054陳廷倫</title>
+    <!-- 引入 Inter Google 標頭字型以提升極簡設計排版質感 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 
+           =========================================
+           設計變數與基礎設定 (CSS Variables & Reset)
+           預設為 Light Mode，當 body 加上 .dark 時切換至 Dark Mode
+           =========================================
+        */
+        :root {
+            /* 顏色規範 - Light Mode */
+            --bg-color: #f4f6f9;
+            --bg-gradient: radial-gradient(circle at 50% 30%, #ffffff 0%, #e2e8f0 100%);
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --card-border: rgba(0, 102, 255, 0.12);
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --accent-blue: #0066ff;
+            --accent-glow: rgba(0, 102, 255, 0.25);
+            --accent-hover: #0052cc;
+            --btn-secondary-bg: #e2e8f0;
+            --btn-secondary-text: #1e293b;
+            --card-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.07), 0 0 15px rgba(0, 102, 255, 0.03);
+            --card-shadow-hover: 0 30px 60px -12px rgba(0, 102, 255, 0.18), 0 0 25px rgba(0, 102, 255, 0.15);
+            --modal-overlay: rgba(15, 23, 42, 0.4);
+            --modal-bg: #ffffff;
+            --badge-bg: rgba(0, 102, 255, 0.08);
+            --badge-text: #0066ff;
+            --grid-line: rgba(0, 0, 0, 0.03);
+        }
+
+        /* Dark Mode (黑藍極簡科技風格) */
+        body.dark {
+            --bg-color: #0b0d12;
+            --bg-gradient: radial-gradient(circle at 50% 20%, #161b26 0%, #08090c 100%);
+            --card-bg: rgba(22, 26, 36, 0.75);
+            --card-border: rgba(0, 229, 255, 0.2);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-blue: #00e5ff;
+            --accent-glow: rgba(0, 229, 255, 0.35);
+            --accent-hover: #33ebff;
+            --btn-secondary-bg: #1e293b;
+            --btn-secondary-text: #f1f5f9;
+            --card-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 229, 255, 0.05);
+            --card-shadow-hover: 0 30px 70px -10px rgba(0, 0, 0, 0.7), 0 0 35px rgba(0, 229, 255, 0.25);
+            --modal-overlay: rgba(0, 0, 0, 0.75);
+            --modal-bg: #161b26;
+            --badge-bg: rgba(0, 229, 255, 0.1);
+            --badge-text: #00e5ff;
+            --grid-line: rgba(255, 255, 255, 0.02);
+        }
+
+        /* 基礎重設 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            background-image: var(--bg-gradient);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+            /* 日夜模式流暢切換轉場 (Requirement IX) */
+            transition: background 0.4s ease, color 0.4s ease;
+        }
+
+        /* 低調科技感背景網格紋理 */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* 
+           =========================================
+           名片主體卡片設計 (Business Card Layout)
+           =========================================
+        */
+        .card-container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 420px;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 40px 32px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+            /* Hover 平移與光圈轉場 (Requirement V & IX) */
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+                        box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+                        background-color 0.4s ease, 
+                        border-color 0.4s ease;
+            cursor: default;
+        }
+
+        /* Hover 微互動效果：懸浮平移 6px 與柔和電光光圈 */
+        .card-container:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        /* 
+           =========================================
+           抽象幾何頭像區域 (Abstract Geometric Avatar)
+           =========================================
+        */
+        .avatar-wrapper {
+            position: relative;
+            width: 130px;
+            height: 130px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 頭像外圍幾何裝飾環 */
+        .avatar-ring {
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+            border: 1px dashed var(--accent-blue);
+            opacity: 0.6;
+            animation: spinRing 25s linear infinite;
+        }
+
+        @keyframes spinRing {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* 抽象幾何頭像 SVG 樣式與懸浮動畫 */
+        .avatar-svg {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #0d1117;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.5s ease;
+            cursor: pointer;
+        }
+
+        .card-container:hover .avatar-svg {
+            transform: scale(1.06) rotate(3deg);
+            box-shadow: 0 8px 30px var(--accent-glow);
+        }
+
+        /* 墨鏡反射動態閃光 */
+        .sunglass-glint {
+            animation: glintMove 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes glintMove {
+            0% { transform: translateX(-10px) translateY(-5px); opacity: 0.4; }
+            100% { transform: translateX(12px) translateY(5px); opacity: 0.9; }
+        }
+
+        /* 
+           =========================================
+           文字內容與階層排版 (Typography & Hierarchy)
+           =========================================
+        */
+        /* 姓名 */
+        .name {
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            transition: color 0.4s ease;
+        }
+
+        /* 學號標籤 */
+        .student-id {
+            display: inline-block;
+            font-size: 0.825rem;
+            font-weight: 600;
+            font-family: 'Inter', monospace;
+            letter-spacing: 0.12em;
+            color: var(--badge-text);
+            background: var(--badge-bg);
+            padding: 4px 12px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+
+        /* 職稱 */
+        .title {
+            font-size: 0.95rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 18px;
+            transition: color 0.4s ease;
+        }
+
+        /* 分隔線 (極簡幾何風格) */
+        .divider {
+            width: 40px;
+            height: 2px;
+            background: var(--accent-blue);
+            margin: 0 auto 18px auto;
+            border-radius: 2px;
+            opacity: 0.8;
+            transition: width 0.3s ease, background-color 0.4s ease;
+        }
+
+        .card-container:hover .divider {
+            width: 65px;
+        }
+
+        /* 個人標語 */
+        .tagline {
+            font-size: 0.875rem;
+            font-weight: 400;
+            font-style: italic;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            margin-bottom: 28px;
+            line-height: 1.5;
+            transition: color 0.4s ease;
+        }
+
+        /* 
+           =========================================
+           互動按鈕區域 (Action Buttons & Ripple)
+           =========================================
+        */
+        .button-group {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .btn {
+            position: relative;
+            overflow: hidden;
+            flex: 1;
+            padding: 13px 20px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            border: none;
+            cursor: pointer;
+            outline: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.25s ease, 
+                        box-shadow 0.25s ease, 
+                        background-color 0.4s ease, 
+                        color 0.4s ease;
+        }
+
+        /* 主按鈕：聯絡我 */
+        .btn-primary {
+            background-color: var(--accent-blue);
+            color: #ffffff;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        body.dark .btn-primary {
+            color: #0b0d12;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 22px var(--accent-glow);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        /* 次按鈕：日夜模式切換 */
+        .btn-secondary {
+            background-color: var(--btn-secondary-bg);
+            color: var(--btn-secondary-text);
+            border: 1px solid rgba(150, 150, 150, 0.15);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.08);
+        }
+
+        .btn-secondary:active {
+            transform: translateY(0);
+        }
+
+        /* Ripple Effect 波紋效果 (Requirement VII) */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.45);
+            transform: scale(0);
+            animation: rippleAnimation 0.6s linear;
+            pointer-events: none;
+        }
+
+        @keyframes rippleAnimation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* 
+           =========================================
+           聯絡 Modal 彈出視窗 (Modal Window Styles)
+           =========================================
+        */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: var(--modal-overlay);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-card {
+            background-color: var(--modal-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 380px;
+            padding: 30px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+            position: relative;
+            transform: scale(0.9) translateY(10px);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.4s ease;
+        }
+
+        .modal-overlay.active .modal-card {
+            transform: scale(1) translateY(0);
+        }
+
+        /* 關閉按鈕 */
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(150, 150, 150, 0.1);
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--accent-blue);
+            color: #ffffff;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+            text-align: left;
+        }
+
+        .modal-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        /* Modal 內聯絡項目列表 */
+        .contact-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 14px;
+            background: rgba(150, 150, 150, 0.05);
+            border: 1px solid rgba(150, 150, 150, 0.1);
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .contact-item:hover {
+            background: rgba(0, 102, 255, 0.08);
+            border-color: var(--accent-blue);
+            transform: translateX(4px);
+        }
+
+        .contact-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: var(--badge-bg);
+            color: var(--accent-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .contact-details {
+            text-align: left;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        .contact-label {
+            font-size: 0.725rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            display: block;
+        }
+
+        .contact-value {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* 複製提示彈訊息 */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--text-primary);
+            color: var(--bg-color);
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            z-index: 200;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* 
+           =========================================
+           響應式設計 (Responsive Design)
+           =========================================
+        */
+        @media (max-width: 480px) {
+            .card-container {
+                padding: 32px 22px;
+            }
+
+            .name {
+                font-size: 1.5rem;
+            }
+
+            .avatar-wrapper {
+                width: 110px;
+                height: 110px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 
+        =========================================
+        主要名片卡片 (Interactive Business Card)
+        =========================================
+    -->
+    <main class="card-container">
+        <!-- 個人照片頭像區域 (轉換為高質感帥氣幾何 SVG) -->
+        <div class="avatar-wrapper">
+            <div class="avatar-ring"></div>
+            
+            <svg class="avatar-svg" viewBox="0 0 140 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <!-- 電光藍雙色漸層 -->
+                    <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#00E5FF" />
+                        <stop offset="100%" stop-color="#0052CC" />
+                    </linearGradient>
+                    <!-- 墨鏡鏡片鏡面反射漸層 -->
+                    <linearGradient id="glassGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#0F172A" />
+                        <stop offset="50%" stop-color="#1E293B" />
+                        <stop offset="100%" stop-color="#0066FF" />
+                    </linearGradient>
+                    <!-- 背景幾何光暈 -->
+                    <radialGradient id="bgGlow" cx="50%" cy="40%" r="60%">
+                        <stop offset="0%" stop-color="#1e293b" />
+                        <stop offset="100%" stop-color="#0b0f17" />
+                    </radialGradient>
+                    <!-- 帥氣幾何切面漸層 -->
+                    <linearGradient id="faceFacet" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="#334155" />
+                        <stop offset="100%" stop-color="#1E293B" />
+                    </linearGradient>
+                </defs>
+
+                <!-- 背景深灰藍圓形基地 -->
+                <circle cx="70" cy="70" r="68" fill="url(#bgGlow)" stroke="url(#blueGrad)" stroke-width="1.5" stroke-opacity="0.4"/>
+
+                <!-- 幾何星空與 HUD 輔助線 -->
+                <line x1="20" y1="70" x2="120" y2="70" stroke="#00E5FF" stroke-opacity="0.1" stroke-dasharray="2 2"/>
+                <line x1="70" y1="20" x2="70" y2="120" stroke="#00E5FF" stroke-opacity="0.1" stroke-dasharray="2 2"/>
+                <circle cx="70" cy="70" r="52" stroke="#00E5FF" stroke-opacity="0.15" stroke-width="1"/>
+
+                <!-- 軀幹與衣服 (極簡寶藍色服裝切面 - 呼應藍色 T-shirt) -->
+                <path d="M 30 135 L 50 102 L 70 110 L 92 100 L 112 135 Z" fill="url(#blueGrad)" opacity="0.9" />
+                <path d="M 50 102 L 70 110 L 70 135 L 30 135 Z" fill="#003D99" opacity="0.5" />
+
+                <!-- 脖子與下巴幾何結構 -->
+                <polygon points="58,82 82,82 78,105 62,105" fill="#1E293B" />
+                <polygon points="58,82 70,82 70,105 62,105" fill="#0F172A" />
+
+                <!-- 臉型幾何切面 (3/4 側臉輪廓) -->
+                <polygon points="46,48 94,48 88,86 70,96 52,86" fill="url(#faceFacet)" />
+                <polygon points="46,48 70,48 70,96 52,86" fill="#1E293B" /> <!-- 暗面陰影 -->
+
+                <!-- 耳朵與耳環/細節 -->
+                <polygon points="43,58 46,54 46,68 43,64" fill="#475569" />
+                <circle cx="44" cy="66" r="1.5" fill="#00E5FF" /> <!-- 科技金屬耳環點綴 -->
+
+                <!-- 帥氣核心：極簡幾何黑框墨鏡 (Angular Sunglasses) -->
+                <!-- 鏡框與橫樑 -->
+                <path d="M 42 54 L 98 52 L 95 68 L 72 69 L 70 61 L 68 69 L 45 68 Z" fill="url(#glassGrad)" stroke="#00E5FF" stroke-width="1.2" />
+                <!-- 墨鏡左鏡片高光點綴 -->
+                <polygon points="47,56 65,55 60,65 48,65" fill="#00E5FF" opacity="0.3" class="sunglass-glint" />
+                <polygon points="73,55 92,54 88,65 75,65" fill="#00E5FF" opacity="0.3" class="sunglass-glint" />
+
+                <!-- 帥氣髮型幾何多邊形 (Messy Layered Hair cuts) -->
+                <!-- 後髮與頂部髮量 -->
+                <path d="M 40 50 L 44 32 L 58 24 L 75 22 L 92 28 L 98 42 L 96 52 L 92 46 L 82 40 L 68 40 L 52 42 Z" fill="#0F172A" />
+                <!-- 前額劉海幾何堆疊 (帶電光藍線條) -->
+                <polygon points="44,32 58,24 64,36" fill="#334155" />
+                <polygon points="58,24 75,22 72,38" fill="#1E293B" />
+                <polygon points="75,22 92,28 80,42" fill="#334155" />
+                <!-- 前瀏海束感切片 -->
+                <polygon points="45,46 54,38 58,50 49,52" fill="#0F172A" />
+                <polygon points="55,44 68,36 70,51 62,50" fill="#1E293B" />
+                <polygon points="68,38 82,36 84,49 74,50" fill="#0F172A" />
+                <polygon points="80,40 94,44 88,52 82,48" fill="#334155" />
+
+                <!-- 科技外光細節點綴 -->
+                <circle cx="102" cy="38" r="1.5" fill="#00E5FF" opacity="0.8"/>
+                <circle cx="34" cy="85" r="1" fill="#00E5FF" opacity="0.5"/>
+            </svg>
+        </div>
+
+        <!-- 姓名 -->
+        <h1 class="name">陳廷倫</h1>
+
+        <!-- 學號標籤 -->
+        <div class="student-id">11136054</div>
+
+        <!-- 職稱 -->
+        <p class="title">Visual Communication Design Student</p>
+
+        <!-- 極簡幾何分隔線 -->
+        <div class="divider"></div>
+
+        <!-- 個人標語 -->
+        <p class="tagline">" Visual Communication × Creative Design "</p>
+
+        <!-- 互動按鈕區塊 -->
+        <div class="button-group">
+            <!-- 聯絡我按鈕 (含 Ripple 波紋效果) -->
+            <button class="btn btn-primary" id="contactBtn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                    <polyline points="22,6 12,13 2,6"></polyline>
+                </svg>
+                聯絡我
+            </button>
+
+            <!-- 日夜模式切換按鈕 -->
+            <button class="btn btn-secondary" id="themeToggleBtn" aria-label="切換日夜模式">
+                <span id="themeIcon">
+                    <!-- 預設顯示月亮圖標 -->
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </span>
+                <span id="themeText">夜間模式</span>
+            </button>
+        </div>
+    </main>
+
+    <!-- 
+        =========================================
+        聯絡資訊 Modal 視窗 (Contact Modal Window)
+        =========================================
+    -->
+    <div class="modal-overlay" id="contactModal" aria-hidden="true">
+        <div class="modal-card">
+            <!-- 關閉 Modal 按鈕 -->
+            <button class="modal-close" id="closeModalBtn" aria-label="關閉視窗">&times;</button>
+            
+            <h2 class="modal-title">聯絡資訊</h2>
+            <p class="modal-subtitle">歡迎透過以下管道與我建立聯繫與合作</p>
+
+            <div class="contact-list">
+                <!-- Email 聯絡項目 -->
+                <a href="mailto:11136054@student.edu.tw" class="contact-item" id="emailContact">
+                    <div class="contact-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                    </div>
+                    <div class="contact-details">
+                        <span class="contact-label">Email</span>
+                        <span class="contact-value">11136054@student.edu.tw</span>
+                    </div>
+                </a>
+
+                <!-- Instagram 聯絡項目 -->
+                <a href="https://instagram.com" target="_blank" rel="noopener" class="contact-item">
+                    <div class="contact-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                        </svg>
+                    </div>
+                    <div class="contact-details">
+                        <span class="contact-label">Instagram</span>
+                        <span class="contact-value">@tinglun_vcd</span>
+                    </div>
+                </a>
+
+                <!-- 作品集連結 -->
+                <a href="#" onclick="event.preventDefault(); showToast('作品集整理中，敬請期待！');" class="contact-item">
+                    <div class="contact-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                            <line x1="8" y1="21" x2="16" y2="21"></line>
+                            <line x1="12" y1="17" x2="12" y2="21"></line>
+                        </svg>
+                    </div>
+                    <div class="contact-details">
+                        <span class="contact-label">Design Portfolio</span>
+                        <span class="contact-value">tinglun-design.com</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 複製成功或提示 Toast Notification -->
+    <div class="toast" id="toast">訊息已複製！</div>
+
+    <script>
+        /* 
+           =========================================
+           JavaScript 互動邏輯 (Interactive Logic)
+           =========================================
+        */
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM 元素選取
+            const themeToggleBtn = document.getElementById('themeToggleBtn');
+            const themeIcon = document.getElementById('themeIcon');
+            const themeText = document.getElementById('themeText');
+            const contactBtn = document.getElementById('contactBtn');
+            const contactModal = document.getElementById('contactModal');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            const emailContact = document.getElementById('emailContact');
+            const toast = document.getElementById('toast');
+
+            /* 
+               1. 日夜模式切換 (Requirement VIII & X)
+               使用 document.body.classList.toggle("dark") 實現模式切換
+            */
+            themeToggleBtn.addEventListener('click', () => {
+                const isDark = document.body.classList.toggle('dark');
+                
+                // 更新按鈕內部的圖標與文字
+                if (isDark) {
+                    themeIcon.innerHTML = `
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                            <line x1="1" y1="12" x2="3" y2="12"></line>
+                            <line x1="21" y1="12" x2="23" y2="12"></line>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                        </svg>
+                    `;
+                    themeText.textContent = '日照模式';
+                } else {
+                    themeIcon.innerHTML = `
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                    `;
+                    themeText.textContent = '夜間模式';
+                }
+            });
+
+            /* 
+               2. 按鈕波紋擴散效果 Ripple Effect (Requirement VII)
+               點擊時根據滑鼠座標動態生成 .ripple 元素
+            */
+            function createRipple(event) {
+                const button = event.currentTarget;
+                const rect = button.getBoundingClientRect();
+                
+                // 計算點擊位置相對於按鈕的 x, y 座標
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+
+                // 建立波紋 span 元素
+                const ripple = document.createElement('span');
+                ripple.classList.add('ripple');
+                ripple.style.left = `${x}px`;
+                ripple.style.top = `${y}px`;
+
+                // 清除舊波紋
+                const existingRipple = button.querySelector('.ripple');
+                if (existingRipple) {
+                    existingRipple.remove();
+                }
+
+                button.appendChild(ripple);
+
+                // 動畫結束後自動移除元素
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            }
+
+            // 為按鈕綁定 Ripple 效果
+            contactBtn.addEventListener('click', createRipple);
+            themeToggleBtn.addEventListener('click', createRipple);
+
+            /* 
+               3. Modal Window 開啟與關閉邏輯 (Requirement VI & X)
+            */
+            // 開啟 Modal
+            contactBtn.addEventListener('click', () => {
+                setTimeout(() => {
+                    contactModal.classList.add('active');
+                    contactModal.setAttribute('aria-hidden', 'false');
+                }, 150); // 微延遲確保波紋動畫完整展現
+            });
+
+            // 關閉 Modal 函式
+            function closeModal() {
+                contactModal.classList.remove('active');
+                contactModal.setAttribute('aria-hidden', 'true');
+            }
+
+            // 點擊 X 按鈕關閉 Modal
+            closeModalBtn.addEventListener('click', closeModal);
+
+            // 點擊 Modal 外部遮罩關閉 (Requirement VI & X)
+            contactModal.addEventListener('click', (event) => {
+                if (event.target === contactModal) {
+                    closeModal();
+                }
+            });
+
+            // 按下 ESC 鍵時關閉 Modal
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && contactModal.classList.contains('active')) {
+                    closeModal();
+                }
+            });
+
+            /* 
+               4. 提示訊息 Toast 系統與 Email 複製體驗
+            */
+            window.showToast = function(message) {
+                toast.textContent = message;
+                toast.classList.add('show');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 2500);
+            };
+
+            // 點擊 Email 複製至剪貼簿
+            emailContact.addEventListener('click', (e) => {
+                e.preventDefault();
+                const emailText = '11136054@student.edu.tw';
+                
+                // 使用安全複製標準相容機制
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(emailText)
+                        .then(() => showToast('已複製 Email 至剪貼簿！'))
+                        .catch(() => fallbackCopy(emailText));
+                } else {
+                    fallbackCopy(emailText);
+                }
+            });
+
+            function fallbackCopy(text) {
+                const tempInput = document.createElement('input');
+                tempInput.value = text;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+                showToast('已複製 Email 至剪貼簿！');
+            }
+        });
+    </script>
+</body>
+</html>
